@@ -28,7 +28,7 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-Frinfon is a minimal sinatra. More useful sinatra (or Kossy?) coming soon!
+Frinfon is a proof of concept. More useful sinatra (or Kossy?) coming soon!
 
 Then this module is going to be deprecated.
 
