@@ -17,11 +17,22 @@ my class Frinfon::Controller {
         Crust::Response.new(status => $status, headers => []);
     }
     method render-json($arg) {
-        my $body = to-json $arg;
-        Crust::Response.new(status => 200, headers => [], body => [$body.encode]);
+        my $body = to-json($arg).encode;
+        my $len  = $body.elems;
+        Crust::Response.new(
+            status => 200,
+            headers => ['Content-Type' => 'application/json; charset=utf-8', 'Content-Length' => $len],
+            body => [$body]
+        );
     }
     method render-text(Str $text) {
-        Crust::Response.new(status => 200, headers => [], body => [$text.encode]);
+        my $body = $text.encode;
+        my $len  = $body.elems;
+        Crust::Response.new(
+            status => 200,
+            headers => ['Content-Type' => 'text/plain; charset=utf-8', 'Content-Length' => $len],
+            body => [$body]
+        );
     }
 }
 sub static(*@root) is export {
