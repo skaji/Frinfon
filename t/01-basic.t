@@ -4,8 +4,8 @@ use Frinfon;
 use Crust::Test;
 use HTTP::Message::PSGI;
 
-get  '/', { $^c.render-text("get") };
-post '/', { $^c.render-text("post") };
+get  '/' => { $^c.render-text("get") };
+post '/' => { $^c.render-text("post") };
 
 test-psgi app.start, -> $cb {
     my $res;

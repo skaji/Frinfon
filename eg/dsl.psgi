@@ -12,4 +12,4 @@ get '/:user' => sub ($c) {
     $c.render-json: { message => "hello $user!" };
 };
 
-app.start;
+app;

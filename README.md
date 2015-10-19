@@ -20,7 +20,7 @@ SYNOPSIS
         $c.render-json: { message => "hello $user!" };
     };
 
-    app.start;
+    app;
 
     # terminal
     > crustup app.psgi
@@ -35,7 +35,7 @@ Then this module is going to be deprecated.
 PROBLEMS
 ========
 
-As far as I know, perl6 does not have `import ` method of perl5. So we cannot create a **context** object for each `app.psgi`. What can we do?
+I thought perl6 did not have perl5's `import` method. **It's wrong! perl6 has EXPORT subroutine!**
 
 AUTHOR
 ======

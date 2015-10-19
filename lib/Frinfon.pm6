@@ -1,47 +1,39 @@
 use v6;
-unit class Frinfon;
-use Router::Boost::Method;
-use Crust::Request;
+class Frinfon does Callable {
+    use Router::Boost::Method;
+    use Crust::Request;
 
-has Router::Boost::Method $.router = Router::Boost::Method.new;
-has @.static;
+    has Router::Boost::Method $.router = Router::Boost::Method.new;
 
-my $SELF = Frinfon.new;
-
-my class Frinfon::Controller {
-    use Crust::Response;
-    has $.request;
-    has $.captured;
-    method req() { $!request }
-    method create-response(Int $status = 200) {
-        Crust::Response.new(status => $status, headers => []);
+    my class Frinfon::Controller {
+        use Crust::Response;
+        has $.request;
+        has $.captured;
+        method req() { $!request }
+        method create-response(Int $status = 200) {
+            Crust::Response.new(status => $status, headers => []);
+        }
+        method render-json($arg) {
+            my $body = to-json($arg).encode;
+            my $len  = $body.elems;
+            Crust::Response.new(
+                status => 200,
+                headers => ['Content-Type' => 'application/json; charset=utf-8', 'Content-Length' => $len],
+                body => [$body]
+            );
+        }
+        method render-text(Str $text) {
+            my $body = $text.encode;
+            my $len  = $body.elems;
+            Crust::Response.new(
+                status => 200,
+                headers => ['Content-Type' => 'text/plain; charset=utf-8', 'Content-Length' => $len],
+                body => [$body]
+            );
+        }
     }
-    method render-json($arg) {
-        my $body = to-json($arg).encode;
-        my $len  = $body.elems;
-        Crust::Response.new(
-            status => 200,
-            headers => ['Content-Type' => 'application/json; charset=utf-8', 'Content-Length' => $len],
-            body => [$body]
-        );
-    }
-    method render-text(Str $text) {
-        my $body = $text.encode;
-        my $len  = $body.elems;
-        Crust::Response.new(
-            status => 200,
-            headers => ['Content-Type' => 'text/plain; charset=utf-8', 'Content-Length' => $len],
-            body => [$body]
-        );
-    }
-}
-sub static(*@root) is export {
-    $SELF.static.append(@root);
-}
 
-method to-app() {
-    # TODO Crust::Middleware::Static
-    sub (%env) {
+    method CALL-ME(%env) {
         my $dest = self.router.match(%env<REQUEST_METHOD>, %env<PATH_INFO>);
         if !$dest {
             return 404, [], ["Not Found\n"];
@@ -63,31 +55,37 @@ method to-app() {
             }
         }
     }
-}
-method start() { self.to-app }
 
-multi get(Pair $p) is export { get(|$p.kv) }
-multi post(Pair $p) is export { post(|$p.kv) }
-multi delete(Pair $p) is export { delete(|$p.kv) }
-multi put(Pair $p) is export { put(|$p.kv) }
+    # XXX useless :-)
+    method start() { self }
 
-multi get(Str $pattern, Callable $handler) is export {
-    $SELF.router.add([<GET HEAD>], $pattern, $handler);
+    method get(Pair $p) {
+        $!router.add([<GET HEAD>], $p.key, $p.value);
+    }
+    method post(Pair $p) {
+        $!router.add([<POST>], $p.key, $p.value);
+    }
+    method delete(Pair $p) {
+        $!router.add([<DELETE>], $p.key, $p.value);
+    }
+    method put(Pair $p) {
+        $!router.add([<PUT>], $p.key, $p.value);
+    }
+    method any-method(Pair $p) {
+        $!router.add([<GET HEAD POST DELETE PUT>], $p.key, $p.value);
+    }
 }
-multi post(Str $pattern, Callable $handler) is export {
-    $SELF.router.add([<POST>], $pattern, $handler);
-}
-multi delete(Str $pattern, Callable $handler) is export {
-    $SELF.router.add([<DELETE>], $pattern, $handler);
-}
-multi put(Str $pattern, Callable $handler) is export {
-    $SELF.router.add([<PUT>], $pattern, $handler);
-}
-multi any-method(Str $pattern, Callable $handler) is export {
-    $SELF.router.add([<GET HEAD POST DELETE PUT>], $pattern, $handler);
-}
-sub app() is export {
-    $SELF;
+
+sub EXPORT {
+    my $frinfon = Frinfon.new;
+    {
+        '&get'        => sub (Pair $p) { $frinfon.get($p) },
+        '&post'       => sub (Pair $p) { $frinfon.post($p) },
+        '&delete'     => sub (Pair $p) { $frinfon.delete($p) },
+        '&put'        => sub (Pair $p) { $frinfon.put($p) },
+        '&any-method' => sub (Pair $p) { $frinfon.any-method($p) },
+        'app'         => $frinfon,
+    }
 }
 
 =begin pod
@@ -110,7 +108,7 @@ Frinfon - minimal sinatra
       $c.render-json: { message => "hello $user!" };
   };
 
-  app.start;
+  app;
 
   # terminal
   > crustup app.psgi
@@ -124,9 +122,8 @@ Then this module is going to be deprecated.
 
 =head1 PROBLEMS
 
-As far as I know, perl6 does not have C< import > method of perl5.
-So we cannot create a B<context> object for each C<app.psgi>.
-What can we do?
+I thought perl6 did not have perl5's C<import> method.
+B<It's wrong! perl6 has EXPORT subroutine!>
 
 =head1 AUTHOR
 
