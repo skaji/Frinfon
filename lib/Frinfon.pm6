@@ -50,7 +50,7 @@ class Frinfon does Callable {
         }
         CATCH {
             default {
-                warn $_;
+                note $_;
                 return 500, [], ["Internal Server Error\n"];
             }
         }
