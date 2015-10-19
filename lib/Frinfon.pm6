@@ -126,10 +126,10 @@ Frinfon - minimal sinatra
 
 =head1 DESCRIPTION
 
-Frinfon is a proof of concept.
-More useful sinatra (or Kossy?) coming soon!
+Frinfon is a minimal sinatra, a well-known ruby web application framework.
+You may write a simple web application with Frinfon quickly.
 
-Then this module is going to be deprecated.
+More useful sinatra (or Kossy?) coming soon!
 
 =head1 PROBLEMS
 
