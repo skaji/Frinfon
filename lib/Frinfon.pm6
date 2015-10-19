@@ -74,6 +74,16 @@ class Frinfon does Callable {
     method any-method(Pair $p) {
         $!router.add([<GET HEAD POST DELETE PUT>], $p.key, $p.value);
     }
+    method start-server(
+        Int :$port = 5000,
+        Str :$host = '0.0.0.0', # 127.0.0.1 ?
+        Str :$server = 'HTTP::Server::Tiny',
+    ) {
+        require Crust::Runner;
+        my $r = ::("Crust::Runner").new;
+        $r.parse-options(<<--port $port --host $host --server $server>>.Array);
+        $r.run(self);
+    }
 }
 
 sub EXPORT {
