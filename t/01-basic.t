@@ -7,7 +7,7 @@ use HTTP::Message::PSGI;
 get  '/' => { $^c.render-text("get") };
 post '/' => { $^c.render-text("post") };
 
-test-psgi app.start, -> $cb {
+test-psgi app, -> $cb {
     my $res;
     $res = $cb(HTTP::Request.new(GET => "/"));
     is $res.content, "get".encode;
