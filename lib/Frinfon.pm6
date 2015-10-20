@@ -2,16 +2,20 @@ use v6;
 class Frinfon does Callable {
     use Router::Boost::Method;
     use Crust::Request;
+    need Data::Section::Simple;
 
     has Router::Boost::Method $.router = Router::Boost::Method.new;
+    has $.template-file;
 
     my class Frinfon::Controller {
         use Crust::Response;
+        use Template::Mojo;
         has $.request;
         has $.captured;
+        has Hash $.template-file;
         method req() { $!request }
         method create-response(Int $status = 200) {
-            Crust::Response.new(status => $status, headers => []);
+            Crust::Response.new(status => $status, headers => [], body => []);
         }
         method render-json($arg) {
             my $body = to-json($arg).encode;
@@ -31,6 +35,18 @@ class Frinfon does Callable {
                 body => [$body]
             );
         }
+        method render(Str $name, *@arg) {
+            my $template-file = $!template-file{$name};
+            die "Cannot find template file '$name'" unless $template-file;
+            my $t = Template::Mojo.new($template-file);
+            my $html = $t.render(|@arg).encode('utf-8');
+            my $len = $html.elems;
+            my $res = self.create-response;
+            $res.headers.push( 'Content-Type' => 'text/html; charset=utf-8' );
+            $res.headers.push( 'Content-Length' => $len );
+            $res.body.push($html);
+            $res;
+        }
     }
 
     method CALL-ME(%env) {
@@ -43,6 +59,7 @@ class Frinfon does Callable {
             my $c = Frinfon::Controller.new(
                 request => Crust::Request.new(%env),
                 captured => $dest<captured>,
+                template-file => $!template-file,
             );
             my $handler = $dest<stuff>;
             my $res = $handler($c);
@@ -55,20 +72,30 @@ class Frinfon does Callable {
             }
         }
     }
+    method !init() {
+        return if $!template-file;
+        my $content = CALLER::CALLER::CALLER::UNIT::<$=finish>;
+        $!template-file = Data::Section::Simple.get-data-section(:$content);
+    }
 
     method get(Pair $p) {
+        self!init;
         $!router.add([<GET HEAD>], $p.key, $p.value);
     }
     method post(Pair $p) {
+        self!init;
         $!router.add([<POST>], $p.key, $p.value);
     }
     method delete(Pair $p) {
+        self!init;
         $!router.add([<DELETE>], $p.key, $p.value);
     }
     method put(Pair $p) {
+        self!init;
         $!router.add([<PUT>], $p.key, $p.value);
     }
     method any-method(Pair $p) {
+        self!init;
         $!router.add([<GET HEAD POST DELETE PUT>], $p.key, $p.value);
     }
 

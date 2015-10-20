@@ -8,7 +8,9 @@
   },
   "depends" : [
     "Crust",
-    "Router::Boost"
+    "Router::Boost",
+    "Data::Section::Simple",
+    "Template::Mojo"
   ],
   "description" : "minimal sinatra",
   "test-depends" : [ ],
