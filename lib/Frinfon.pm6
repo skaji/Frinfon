@@ -5,7 +5,7 @@ class Frinfon does Callable {
     need Data::Section::Simple;
 
     has Router::Boost::Method $.router = Router::Boost::Method.new;
-    has $.template-file;
+    has Hash $.template-file;
 
     my class Frinfon::Controller {
         use Crust::Response;
@@ -74,8 +74,11 @@ class Frinfon does Callable {
     }
     method !init() {
         return if $!template-file;
-        my $content = CALLER::CALLER::CALLER::UNIT::<$=finish>;
-        $!template-file = Data::Section::Simple.get-data-section(:$content);
+        if CALLER::CALLER::CALLER::UNIT::<$=finish> -> $content {
+            $!template-file = Data::Section::Simple.get-data-section(:$content);
+        } else {
+            $!template-file = {};
+        }
     }
 
     method get(Pair $p) {
