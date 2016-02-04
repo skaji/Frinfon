@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/shoichikaji/Frinfon.svg?branch=master)](https://travis-ci.org/shoichikaji/Frinfon)
+[![Build Status](https://travis-ci.org/skaji/Frinfon.svg?branch=master)](https://travis-ci.org/skaji/Frinfon)
 
 NAME
 ====

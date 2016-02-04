@@ -1,7 +1,8 @@
 {
   "name" : "Frinfon",
-  "source-url" : "git://github.com/shoichikaji/Frinfon.git",
-  "perl" : "v6",
+  "source-url" : "git://github.com/skaji/Frinfon.git",
+  "perl" : "6.c",
+  "resources" : [ ],
   "build-depends" : [ ],
   "provides" : {
     "Frinfon" : "lib/Frinfon.pm6"
